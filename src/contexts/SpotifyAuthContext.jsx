@@ -14,7 +14,7 @@ export function useSpotifyAuthContext(){
     return useContext(SpotifyAuthContext);
 }
 
-const clientID = "7eacfdfe5b634b0786cb9b888a756c82"
+const clientId = "7eacfdfe5b634b0786cb9b888a756c82"
 
 export function SpotifyAuthProvider({children}){
     
@@ -46,7 +46,7 @@ export function SpotifyAuthProvider({children}){
 			setUserAuthData(authData);
             // This cleans up the URL in the browser tab
             // removing the Spotify auth data so it doesn't impact the page load useEffect
-            window.history.replace(null, "Spotify Stats Board", "/");
+			window.history.replaceState(null, "Spotify Statsboards", "/");
 		}
 		if (userAuthCode){
 			getAuthData();
@@ -79,8 +79,58 @@ export function SpotifyAuthProvider({children}){
         return authTokens;
     }
 
+
+
+    // This function is called when the user clicks the sign in button and sends them to the Spotify sign in page
+    async function redirectToAuthCodeFlow() {
+
+        // Generate a random string for the code verifier and challenge
+        const verifier = generateCodeVerifier(128);
+        const challenge = await generateCodeChallenge(verifier);
+        
+        // Save the verifier in local storage so we can use it later
+        localStorage.setItem("verifier", verifier);
+    
+        // Create the query parameters for the Spotify auth API
+        const params = new URLSearchParams();
+        params.append("client_id", clientId);
+        params.append("response_type", "code");
+        params.append("redirect_uri", "http://localhost:5173/spotifycallback");
+        params.append("scope", "user-read-private user-read-email");
+        params.append("code_challenge_method", "S256");
+        params.append("code_challenge", challenge);
+    
+        document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    }
+    
+    // This function generates a random string for the code verifier
+    function generateCodeVerifier(length) {
+        let text = '';
+        let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    
+        for (let i = 0; i < length; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+    }
+    
+    // This function generates a code challenge from the code verifier
+    async function generateCodeChallenge(codeVerifier) {
+        const data = new TextEncoder().encode(codeVerifier);
+        const digest = await window.crypto.subtle.digest('SHA-256', data);
+        return btoa(String.fromCharCode.apply(null, [...new Uint8Array(digest)]))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+    }
+
+
+
+
+    
+
     return (
-        <SpotifyAuthContext.Provider value={{userAuthData}}>
+        <SpotifyAuthContext.Provider value={{userAuthData, redirectToAuthCodeFlow }}>
             {children}
         </SpotifyAuthContext.Provider>
     )
