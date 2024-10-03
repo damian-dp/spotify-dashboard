@@ -1,15 +1,17 @@
-
 import './App.css'
-import { useThemeContext } from './context/ThemeContextProvider'
+import { useThemeContext } from './contexts/ThemeContextProvider'
 
 function App() {
-
-  const [theme, toggleTheme] = useThemeContext()
+  
+  const [currentTheme, toggleTheme, setToSystem] = useThemeContext();
 
   return (
     <>
       <button onClick={toggleTheme}>
         Toggle theme
+      </button>
+      <button onClick={setToSystem}>
+        Set to system theme
       </button>
     </>
   )

@@ -2,12 +2,15 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
-import { ThemeContextProvider } from './context/ThemeContextProvider.jsx'
+import { ThemeContextProvider } from './contexts/ThemeContextProvider.jsx'
+import { SpotifyAuthProvider } from './contexts/SpotifyAuthContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeContextProvider>
-      <App />
-    </ThemeContextProvider>
+      <SpotifyAuthProvider>
+        <App />
+      </SpotifyAuthProvider>
+    </ThemeContextProvider>    
   </StrictMode>,
 )
